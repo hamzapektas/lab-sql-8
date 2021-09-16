@@ -50,11 +50,65 @@ LIMIT 5;
 
 -- 6 Is "Academy Dinosaur" available for rent from Store 1?
 
+SELECT film_id FROM film
+WHERE title = 'Academy Dinosaur';
+
+SELECT inventory_id FROM inventory
+WHERE film_id = 1 AND store_id = 1;
+
+SELECT inventory_id, return_date
+FROM rental
+WHERE return_date IS NOT NULL AND inventory_id <= 4;
+
+-- So yes it is.
+
 -- 7 Get all pairs of actors that worked together.
+
+SELECT * FROM (SELECT f1.film_id, f1.actor_id AS firstactor, a1.first_name AS firstactor_firstname, a1.last_name AS firstactor_last_name, f2.actor_id AS secondactor
+FROM film_actor f1
+JOIN film_actor f2
+ON (f1.actor_id<>f2.actor_id) AND f1.film_id = f2.film_id
+JOIN actor a1
+ON f1.actor_id = a1.actor_id) j1
+JOIN actor a2
+ON j1.secondactor = a2.actor_id;
+
 -- 8 Get all pairs of customers that have rented the same film more than 3 times.
+
+SELECT i.film_id, title, r1.inventory_id, r1.customer_id as first_customer, r2.customer_id as second_customer
+FROM rental r1
+JOIN rental r2
+ON r1.customer_id <> r2.customer_id AND r1.inventory_id = r2.inventory_id
+JOIN inventory i
+ON r1.inventory_id = i.inventory_id
+JOIN film f
+ON i.film_id = f.film_id
+GROUP BY r1.inventory_id
+HAVING count(i.film_id)>3
+ORDER BY i.film_id asc;
+
+
+SELECT i.film_id, r1.inventory_id, r1.customer_id, r2.customer_id 
+FROM rental r1
+JOIN rental r2
+ON r1.customer_id <> r2.customer_id AND r1.inventory_id = r2.inventory_id
+JOIN inventory i
+ON r1.inventory_id = i.inventory_id
+GROUP BY r1.inventory_id
+HAVING count(i.film_id)>3
+ORDER BY i.film_id asc;
+
+
 -- 9 For each film, list actor that has acted in more films.
 
-
-
+SELECT title as film, concat(first_name,' ',last_name) as actor
+FROM film_actor fa
+JOIN film f
+ON fa.film_id = f.film_id
+JOIN actor a
+ON fa.actor_id = a.actor_id
+GROUP BY f.film_id
+HAVING count(fa.film_id) > 1
+ORDER BY film asc;
 
 
